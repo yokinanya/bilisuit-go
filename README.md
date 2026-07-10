@@ -11,6 +11,18 @@ go run main.go xxxxxx.json
 ```
 其中`xxxxxx.json`使用 [BilibiliSuitBuy-4Fast](https://github.com/FangCunWuChang/BilibiliSuitBuy-4Fast) 工具生成
 
+如果配置中的启动时间已经小于当前时间，但仍需要立即购买，可以添加 `--now` 或 `--immediate` 参数：
+
+```bash
+go run main.go xxxxxx.json --now
+```
+
+也可以写成：
+
+```bash
+go run main.go --now xxxxxx.json
+```
+
 ## 工具链
 ### 工作流程
 ```mermaid

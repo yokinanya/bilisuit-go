@@ -7,14 +7,34 @@ import (
 	"time"
 )
 
+func IsImmediateBuy() bool {
+	for _, arg := range os.Args[1:] {
+		if arg == "--now" || arg == "--immediate" {
+			return true
+		}
+	}
+	return false
+}
+
 func GetSettingFilePath() string {
 	var FilePath string
 	if len(os.Args) <= 1 {
 		fmt.Printf("请选择一个配置文件\n")
 		os.Exit(1)
-	} else {
-		FilePath = os.Args[len(os.Args)-1]
 	}
+
+	for _, arg := range os.Args[1:] {
+		if arg == "--now" || arg == "--immediate" {
+			continue
+		}
+		FilePath = arg
+	}
+
+	if FilePath == "" {
+		fmt.Printf("请选择一个配置文件\n")
+		os.Exit(1)
+	}
+
 	_, err := os.Lstat(FilePath)
 	if err != nil {
 		fmt.Printf("[%v]不存在\n", FilePath)
@@ -36,7 +56,7 @@ type SettingFile struct {
 	Headers  map[string]string `json:"headers"`
 }
 
-func ReaderSetting(filePath string) (map[string]string, int64, int64, string) {
+func ReaderSetting(filePath string, immediateBuy bool) (map[string]string, int64, int64, string) {
 	var SettingData, _ = os.ReadFile(filePath)
 	var settingContent = SettingFile{}
 
@@ -47,8 +67,12 @@ func ReaderSetting(filePath string) (map[string]string, int64, int64, string) {
 	var startTime = settingContent.Setting.StartTime
 
 	if startTime <= time.Now().Unix() {
-		fmt.Printf("%v\n", "启动时间小于当前时间")
-		os.Exit(2)
+		if !immediateBuy {
+			fmt.Printf("%v\n", "启动时间小于当前时间")
+			fmt.Printf("如需忽略启动时间并立即购买，请添加参数: --now\n")
+			os.Exit(2)
+		}
+		fmt.Printf("启动时间小于当前时间，已启用立即购买模式\n")
 	}
 
 	var delayTime = settingContent.Setting.DelayTime
